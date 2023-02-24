@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 @Data
 @AllArgsConstructor
 @ToString
-public class Result {
+public class Result implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final int code;
     private Object data;
     private String msg;

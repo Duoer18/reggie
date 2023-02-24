@@ -8,6 +8,9 @@ spring:
 #    host: 192.168.86.130
 #    password: root
     database: 0
+  cache:
+    redis:
+      time-to-live: 1800000
 mybatis-plus:
   global-config:
     db-config:

@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +47,7 @@ public class SetmealController {
     }
 
     @PostMapping
+    @CacheEvict(value = "setMeal", allEntries = true)
     public Result addSetmeal(@RequestBody SetmealDto setmealDto) {
         log.info("add {}", setmealDto);
 
@@ -65,6 +68,7 @@ public class SetmealController {
     }
 
     @PutMapping
+    @CacheEvict(value = "setMeal", allEntries = true)
     public Result updateSet(@RequestBody SetmealDto setmealDto) {
         boolean isUpdated = setmealService.updateSetmeal(setmealDto);
         if (isUpdated) {
@@ -87,6 +91,7 @@ public class SetmealController {
     }
 
     @PostMapping("/status/{status}")
+    @CacheEvict(value = "setMeal", allEntries = true)
     public Result changeSetmealStatus(@PathVariable int status, @RequestParam List<Long> ids) {
         List<Setmeal> setmealList = ids.stream()
                 .map(id -> {
@@ -105,6 +110,7 @@ public class SetmealController {
     }
 
     @GetMapping("/list")
+    @Cacheable(value = "setMeal", key = "'cid_' + #setmeal.categoryId + '/status_' + #setmeal.status")
     public Result getSetmealList(Setmeal setmeal) {
         log.info("get setmeal categoryId={}", setmeal.getCategoryId());
 
