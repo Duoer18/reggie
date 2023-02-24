@@ -9,10 +9,12 @@ import com.duoer.reggie.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
@@ -20,6 +22,8 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     @PostMapping("/sendMsg")
     public Result sendMsg(@RequestBody User user, HttpSession session) throws Exception {
@@ -31,7 +35,10 @@ public class UserController {
 //            MessageSender.send("阿里云短信测试", "SMS_154950909",
 //                    phoneNumber, code);
             log.info("code={}", code);
-            session.setAttribute("code", code);
+
+//            session.setAttribute("code", code);
+            // 采用redis缓存验证码
+            redisTemplate.opsForValue().set(phoneNumber, code, 5, TimeUnit.MINUTES);
             return Result.success("验证码发送成功");
         }
 
@@ -42,8 +49,10 @@ public class UserController {
     public Result login(@RequestBody Map<String ,String> u, HttpSession session) {
         log.info("login user {}", u);
 
-        String code = (String) session.getAttribute("code");
         String phoneNumber = u.get("phone");
+//        String code = (String) session.getAttribute("code");
+        // 从redis中获取验证码
+        String code = (String) redisTemplate.opsForValue().get(phoneNumber);
         String codeFromUser = u.get("code");
 
         if (StringUtils.isNotEmpty(phoneNumber) && codeFromUser != null && codeFromUser.equals(code)) {
@@ -58,7 +67,9 @@ public class UserController {
             }
 
             session.setAttribute("user", user.getId());
-            session.removeAttribute("code");
+//            session.removeAttribute("code");
+            // 删除redis验证码
+            redisTemplate.delete(phoneNumber);
             return Result.success(user);
         }
 

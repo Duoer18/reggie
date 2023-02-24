@@ -17,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +43,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     }
 
     @Override
-    public DishDto getDto(Dish dish, boolean setFlavors) {
+    public DishDto getDto(Dish dish, boolean setFlavors, boolean setCategory) {
         DishDto dishDto = new DishDto();
         BeanUtils.copyProperties(dish, dishDto);
 
@@ -51,19 +53,21 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             dishDto.setFlavors(dishFlavorService.list(flavorQueryWrapper));
         }
 
-        Category category = categoryService.getById(dishDto.getCategoryId());
-        if (category != null) {
-            dishDto.setCategoryName(category.getName());
+        if (setCategory) {
+            Category category = categoryService.getById(dishDto.getCategoryId());
+            if (category != null) {
+                dishDto.setCategoryName(category.getName());
+            }
         }
 
         return dishDto;
     }
 
     @Override
-    public List<DishDto> getDtoList(List<Dish> dishes ,boolean setFlavor) {
+    public List<DishDto> getDtoList(List<Dish> dishes ,boolean setFlavor, boolean setCategory) {
         return dishes
                 .stream()
-                .map(dish -> getDto(dish, setFlavor))
+                .map(dish -> getDto(dish, setFlavor, setCategory))
                 .collect(Collectors.toList());
     }
 
@@ -71,7 +75,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     public DishDto getDishById(long id) {
         Dish dish = getById(id);
         if (dish != null) {
-            return getDto(dish, true);
+            return getDto(dish, true, true);
         } else {
             throw new ServiceException("菜品不存在");
         }
@@ -85,7 +89,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                 .orderByAsc(Dish::getSort)
                 .orderByDesc(Dish::getUpdateTime);
         List<Dish> dishes = list(queryWrapper);
-        return getDtoList(dishes, true);
+        return getDtoList(dishes, true, false);
     }
 
     @Transactional
@@ -106,12 +110,48 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     @Transactional
     @Override
-    public boolean deleteDishes(List<Long> ids) {
+    public Map.Entry<Boolean, List<Object>> deleteDishes(List<Long> ids) {
+        // 查询ids中所有在售菜品
+//        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.in(Dish::getId, ids)
+//                .eq(Dish::getStatus, 1)
+//                .select(Dish::getId);
+//        long validCounts = count(queryWrapper);
+//        if (validCounts > 0) { // 有在售菜品
+//            throw new ServiceException("删除失败，请先停售菜品");
+//        }
+
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Dish::getId, ids);
+
+        List<Dish> dishes = list(queryWrapper);
+        List<Object> keys = dishes.stream()
+                .map(dish -> {
+                    if (dish.getStatus() == 1) {
+                        throw new ServiceException("删除失败，请先停售菜品");
+                    }
+                    return (Object) ("dishes:cid=" + dish.getCategoryId() + ";status=1");
+                })
+                .collect(Collectors.toList());
+
+        // 删除所有菜品
+        boolean isRemoved = removeBatchByIds(ids);
+
+        // 删除所有口味
+        LambdaQueryWrapper<DishFlavor> flavorQueryWrapper = new LambdaQueryWrapper<>();
+        flavorQueryWrapper.in(DishFlavor::getDishId, ids);
+        dishFlavorService.remove(flavorQueryWrapper);
+
+        return new AbstractMap.SimpleEntry<>(isRemoved, keys);
+    }
+
+    @Transactional
+    @Override
+    public boolean deleteDishesNoCache(List<Long> ids) {
         // 查询ids中所有在售菜品
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Dish::getId, ids)
-                .eq(Dish::getStatus, 1)
-                .select(Dish::getId);
+                .eq(Dish::getStatus, 1);
         long validCounts = count(queryWrapper);
         if (validCounts > 0) { // 有在售菜品
             throw new ServiceException("删除失败，请先停售菜品");

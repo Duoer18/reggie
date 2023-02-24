@@ -5,13 +5,15 @@ import com.duoer.reggie.dto.DishDto;
 import com.duoer.reggie.entity.Dish;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DishService extends IService<Dish> {
     boolean saveWithFlavor(DishDto dishDto);
     DishDto getDishById(long id);
     boolean updateDish(DishDto dishDto);
-    boolean deleteDishes(List<Long> ids);
-    DishDto getDto(Dish dish, boolean setFlavors);
-    List<DishDto> getDtoList(List<Dish> dishes ,boolean setFlavor);
+    Map.Entry<Boolean, List<Object>> deleteDishes(List<Long> ids);
+    DishDto getDto(Dish dish, boolean setFlavors, boolean setCategory);
+    List<DishDto> getDtoList(List<Dish> dishes ,boolean setFlavor, boolean setCategory);
     List<DishDto> listDishes(Dish dish);
+    boolean deleteDishesNoCache(List<Long> ids);
 }

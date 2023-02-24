@@ -4,12 +4,16 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 @SpringBootApplication
 @EnableTransactionManagement
 public class ReggieTakeOutApplication {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException {
         SpringApplication.run(ReggieTakeOutApplication.class, args);
+        System.out.println(InetAddress.getLocalHost().getHostAddress());
     }
 
 }
