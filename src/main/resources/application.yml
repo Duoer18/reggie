@@ -1,9 +1,32 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: root
-    url: jdbc:mysql:///reggie?useServerPrepStmts=true&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: root
+#    password: root
+#    url: jdbc:mysql:///reggie?useServerPrepStmts=true&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+  shardingsphere:
+    datasource:
+      names: master,slave
+      master:
+#        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.86.130:3306/reggie?characterEncoding=utf-8&useSSL=false
+        username: root
+        password: root
+      slave:
+#        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.86.139:3306/reggie?characterEncoding=utf-8&useSSL=false
+        username: root
+        password: root
+    masterslave:
+      master-data-source-name: master
+      slave-data-source-names: slave
+      load-balance-algorithm-type: round_robin
+      name: dataSource
+    props:
+      sql:
+        show: true
   redis:
 #    host: 192.168.86.130
 #    password: root
@@ -11,6 +34,8 @@ spring:
   cache:
     redis:
       time-to-live: 1800000
+  main:
+    allow-bean-definition-overriding: true
 mybatis-plus:
   global-config:
     db-config:
