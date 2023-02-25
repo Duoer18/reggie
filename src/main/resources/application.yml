@@ -26,6 +26,7 @@ spring:
         use-ping-method: false
     masterslave:
       load-balance-algorithm-type: round_robin
+      # 数据源 bean 的名称，即 <bean id="{name}" ...>或 <bean name="{name}" ...>
       name: dataSource
       master-data-source-name: master
       slave-data-source-names: slave
