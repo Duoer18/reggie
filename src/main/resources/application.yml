@@ -1,29 +1,32 @@
 spring:
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    username: root
-#    password: root
-#    url: jdbc:mysql:///reggie?useServerPrepStmts=true&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+  # 此配置会被sharding中datasource覆盖
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql:///reggie?useServerPrepStmts=true&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
   shardingsphere:
     datasource:
       names:
         master,slave
       master:
-#        type: com.zaxxer.hikari.HikariDataSource
-        type: com.alibaba.druid.pool.DruidDataSource
+        type: com.zaxxer.hikari.HikariDataSource
+#        type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.jdbc.Driver
-        url: jdbc:mysql://192.168.86.130:3306/reggie?useServerPrepStmts=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+        jdbcUrl: jdbc:mysql://192.168.86.130:3306/reggie?useServerPrepStmts=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+#        url: jdbc:mysql://192.168.86.130:3306/reggie?useServerPrepStmts=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
         username: root
         password: root
-        use-ping-method: false
+#        use-ping-method: false
       slave:
-#        type: com.zaxxer.hikari.HikariDataSource
-        type: com.alibaba.druid.pool.DruidDataSource
+        type: com.zaxxer.hikari.HikariDataSource
+#        type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.jdbc.Driver
+        jdbcUrl: jdbc:mysql://192.168.86.139:3306/reggie?useServerPrepStmts=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
         url: jdbc:mysql://192.168.86.139:3306/reggie?useServerPrepStmts=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
         username: root
         password: root
-        use-ping-method: false
+#        use-ping-method: false
     masterslave:
       load-balance-algorithm-type: round_robin
       # 数据源 bean 的名称，即 <bean id="{name}" ...>或 <bean name="{name}" ...>
