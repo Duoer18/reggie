@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -121,10 +122,10 @@ public class DishController {
             // 清除redis中缓存
             LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.in(Dish::getId, ids);
-            List<Object> keys = dishService.list(queryWrapper)
+            Set<Object> keys = dishService.list(queryWrapper)
                     .stream()
                     .map(dish -> (Object) ("dishes:cid=" + dish.getCategoryId() + ";status=1"))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
             redisTemplate.delete(keys);
 
             return Result.success("菜品状态修改成功");
@@ -144,7 +145,7 @@ public class DishController {
         } else {
             return Result.failed("删除菜品失败");
         }
-//        Map.Entry<Boolean, List<Object>> isRemovedFlagAndRedisKeys = dishService.deleteDishes(ids);
+//        Map.Entry<Boolean, Set<Object>> isRemovedFlagAndRedisKeys = dishService.deleteDishes(ids);
 //        if (isRemovedFlagAndRedisKeys.getKey()) {
 //            redisTemplate.delete(isRemovedFlagAndRedisKeys.getValue());
 //            return Result.success("删除菜品成功");

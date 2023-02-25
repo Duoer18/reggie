@@ -6,12 +6,13 @@ import com.duoer.reggie.entity.Dish;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface DishService extends IService<Dish> {
     boolean saveWithFlavor(DishDto dishDto);
     DishDto getDishById(long id);
     boolean updateDish(DishDto dishDto);
-    Map.Entry<Boolean, List<Object>> deleteDishes(List<Long> ids);
+    Map.Entry<Boolean, Set<Object>> deleteDishes(List<Long> ids);
     DishDto getDto(Dish dish, boolean setFlavors, boolean setCategory);
     List<DishDto> getDtoList(List<Dish> dishes ,boolean setFlavor, boolean setCategory);
     List<DishDto> listDishes(Dish dish);

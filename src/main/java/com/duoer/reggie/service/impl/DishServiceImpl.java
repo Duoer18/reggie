@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -110,7 +111,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     @Transactional
     @Override
-    public Map.Entry<Boolean, List<Object>> deleteDishes(List<Long> ids) {
+    public Map.Entry<Boolean, Set<Object>> deleteDishes(List<Long> ids) {
         // 查询ids中所有在售菜品
 //        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
 //        queryWrapper.in(Dish::getId, ids)
@@ -125,14 +126,14 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         queryWrapper.in(Dish::getId, ids);
 
         List<Dish> dishes = list(queryWrapper);
-        List<Object> keys = dishes.stream()
+        Set<Object> keys = dishes.stream()
                 .map(dish -> {
                     if (dish.getStatus() == 1) {
                         throw new ServiceException("删除失败，请先停售菜品");
                     }
                     return (Object) ("dishes:cid=" + dish.getCategoryId() + ";status=1");
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         // 删除所有菜品
         boolean isRemoved = removeBatchByIds(ids);
