@@ -58,4 +58,4 @@ server:
       timeout: 60m
 reggie:
   # 文件转储路径
-  upload-path: D:/RuijiTakeout/temp/
+  upload-path: /usr/local/reggie-pics/
