@@ -40,7 +40,7 @@ spring:
     allow-bean-definition-overriding: true
   redis:
 #    host: 192.168.86.130
-#    password: root
+    password: root
     database: 0
   cache:
     redis:
