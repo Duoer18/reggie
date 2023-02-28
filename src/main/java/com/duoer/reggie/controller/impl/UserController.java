@@ -1,4 +1,4 @@
-package com.duoer.reggie.controller;
+package com.duoer.reggie.controller.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.duoer.reggie.common.Result;

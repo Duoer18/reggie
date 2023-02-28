@@ -1,4 +1,4 @@
-package com.duoer.reggie.controller;
+package com.duoer.reggie.controller.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -23,7 +23,7 @@ public class AddressBookController {
     public Result save(@RequestBody AddressBook a) {
         log.info("add {}", a);
 
-        a.setUserId(BaseContext.getEId());
+        a.setUserId(BaseContext.getUId());
         boolean isSaved = addressBookService.save(a);
         if (isSaved) {
             return Result.success(a);
@@ -37,14 +37,14 @@ public class AddressBookController {
         log.info("set default addressBook:{}", a);
 
         // 确保用户只能设置自己的地址
-        Long eId = BaseContext.getEId();
+        Long uId = BaseContext.getUId();
         AddressBook address = addressBookService.getById(a.getId());
-        if (address == null || address.getUserId() == null || !address.getUserId().equals(eId)) {
+        if (address == null || address.getUserId() == null || !address.getUserId().equals(uId)) {
             return Result.failed("invalid access");
         }
 
         LambdaUpdateWrapper<AddressBook> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(AddressBook::getUserId, BaseContext.getEId());
+        wrapper.eq(AddressBook::getUserId, uId);
         wrapper.set(AddressBook::getIsDefault, 0);
         addressBookService.update(wrapper);
 
@@ -60,7 +60,7 @@ public class AddressBookController {
         AddressBook addressBook = addressBookService.getById(id);
         if (addressBook != null) {
             // 确保用户只能获取自己的地址
-            if (addressBook.getUserId() != null && addressBook.getUserId().equals(BaseContext.getEId())) {
+            if (addressBook.getUserId() != null && addressBook.getUserId().equals(BaseContext.getUId())) {
                 return Result.success(addressBook);
             } else {
                 return Result.failed("invalid access");
@@ -73,7 +73,7 @@ public class AddressBookController {
     @GetMapping("/default")
     public Result getDefault() {
         LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(AddressBook::getUserId, BaseContext.getEId());
+        queryWrapper.eq(AddressBook::getUserId, BaseContext.getUId());
         queryWrapper.eq(AddressBook::getIsDefault, 1);
 
         AddressBook addressBook = addressBookService.getOne(queryWrapper);
@@ -89,7 +89,7 @@ public class AddressBookController {
     public Result setAddress(@RequestBody AddressBook a) {
         log.info("update {}", a);
 
-        Long eId = BaseContext.getEId();
+        Long eId = BaseContext.getUId();
         AddressBook address = addressBookService.getById(a.getId());
         if (address == null || address.getUserId() == null || !address.getUserId().equals(eId)) {
             return Result.failed("invalid access");
@@ -108,7 +108,7 @@ public class AddressBookController {
 
         LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(AddressBook::getId, ids)
-                .eq(AddressBook::getUserId, BaseContext.getEId());
+                .eq(AddressBook::getUserId, BaseContext.getUId());
 
         boolean isRemoved = addressBookService.remove(queryWrapper);
         if (isRemoved) {
@@ -122,7 +122,7 @@ public class AddressBookController {
     public Result list(AddressBook addressBook) {
         log.info("addressBook:{}", addressBook);
 
-        addressBook.setUserId(BaseContext.getEId());
+        addressBook.setUserId(BaseContext.getUId());
         LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(null != addressBook.getUserId(), AddressBook::getUserId, addressBook.getUserId());
         queryWrapper.orderByDesc(AddressBook::getUpdateTime);

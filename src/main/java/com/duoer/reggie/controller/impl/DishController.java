@@ -1,15 +1,14 @@
-package com.duoer.reggie.controller;
+package com.duoer.reggie.controller.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.duoer.reggie.common.Result;
+import com.duoer.reggie.controller.AbstractDishController;
 import com.duoer.reggie.dto.DishDto;
 import com.duoer.reggie.entity.Dish;
-import com.duoer.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,10 +17,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/dish")
 @Slf4j
-public class DishController {
-    @Autowired
-    private DishService dishService;
-
+public class DishController extends AbstractDishController {
     /**
      * 菜品添加接口
      */
@@ -113,9 +109,6 @@ public class DishController {
 
     @GetMapping("/list")
     public Result getDishes(Dish dish) {
-        log.info("get dishes in categoryId={} and status={}", dish.getCategoryId(), dish.getStatus());
-
-        List<DishDto> dishDtoList = dishService.listDishes(dish);
-        return Result.success(dishDtoList);
+        return super.getDishes(dish);
     }
 }

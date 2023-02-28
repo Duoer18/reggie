@@ -40,7 +40,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Transactional
     @Override
     public boolean addOrder(Orders order) {
-        Long uid = BaseContext.getEId();
+        Long uid = BaseContext.getUId();
 
         List<ShoppingCart> shoppingCarts = shoppingCartService.listCarts(uid);
         if (shoppingCarts == null || shoppingCarts.size() == 0) {
@@ -101,7 +101,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public Page<? extends Orders> getUserOrdersByPage(int page, int pageSize, boolean withDetails) {
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Orders::getUserId, BaseContext.getEId())
+        queryWrapper.eq(Orders::getUserId, BaseContext.getUId())
                 .orderByDesc(Orders::getOrderTime);
         return getOrdersByPage(page, pageSize, withDetails, queryWrapper);
     }

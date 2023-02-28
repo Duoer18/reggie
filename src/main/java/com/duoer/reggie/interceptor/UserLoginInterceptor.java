@@ -18,14 +18,15 @@ public class UserLoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession();
         Long uid = (Long) session.getAttribute("user");
-        if (uid != null) {
+        if (uid != null) { // 用户已登录
             log.info("Accessing {} granted", request.getRequestURI());
             BaseContext.setUid(uid);
             return true;
-        } else {
-            log.info("Accessing {} intercepted", request.getRequestURI());
-            response.getWriter().write(JSON.toJSONString(Result.failed("NOTLOGIN")));
-            return false;
         }
+
+        log.info("Accessing {} intercepted", request.getRequestURI());
+        response.getWriter().write(JSON.toJSONString(Result.failed("NOTLOGIN")));
+        return false;
+
     }
 }

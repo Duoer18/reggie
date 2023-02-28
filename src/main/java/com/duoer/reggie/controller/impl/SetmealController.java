@@ -1,4 +1,4 @@
-package com.duoer.reggie.controller;
+package com.duoer.reggie.controller.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -102,14 +102,6 @@ public class SetmealController {
         } else {
             return Result.failed("套餐状态修改失败");
         }
-    }
-
-    @GetMapping("/list")
-    public Result getSetmealList(Setmeal setmeal) {
-        log.info("get setmeal categoryId={}", setmeal.getCategoryId());
-
-        List<Setmeal> setmealList = setmealService.listSets(setmeal);
-        return Result.success(setmealList);
     }
 
     @GetMapping("/dish/{id}")

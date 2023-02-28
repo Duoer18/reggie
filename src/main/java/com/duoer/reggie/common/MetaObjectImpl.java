@@ -19,7 +19,7 @@ public class MetaObjectImpl implements MetaObjectHandler {
         metaObject.setValue("createTime", now);
         metaObject.setValue("updateTime", now);
 
-        Long id = BaseContext.getEId();
+        Long id = BaseContext.getEId() != null ? BaseContext.getEId() : BaseContext.getUId();
         metaObject.setValue("createUser", id);
         metaObject.setValue("updateUser", id);
     }

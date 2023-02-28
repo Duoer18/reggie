@@ -1,23 +1,17 @@
-package com.duoer.reggie.controller;
+package com.duoer.reggie.controller.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.duoer.reggie.common.Result;
+import com.duoer.reggie.controller.AbstractCategoryController;
 import com.duoer.reggie.entity.Category;
-import com.duoer.reggie.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/category")
 @Slf4j
-public class CategoryController {
-    @Autowired
-    private CategoryService categoryService;
-
+public class CategoryController extends AbstractCategoryController {
     @PostMapping
     public Result addCategory(@RequestBody Category c) {
         log.info("add {}", c);
@@ -39,18 +33,6 @@ public class CategoryController {
         Page<Category> categoryPage = new Page<>(page, pageSize);
         categoryService.page(categoryPage, queryWrapper);
         return Result.success(categoryPage);
-    }
-
-    @GetMapping("/list")
-    public Result getCategories(Category c) {
-        log.info("品类");
-
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(c.getType() != null, Category::getType, c.getType())
-                .orderByAsc(Category::getSort)
-                .orderByDesc(Category::getUpdateTime);
-        List<Category> categories = categoryService.list(queryWrapper);
-        return Result.success(categories);
     }
 
     @DeleteMapping
@@ -83,5 +65,10 @@ public class CategoryController {
 
         Category c = categoryService.getById(id);
         return Result.success(c);
+    }
+
+    @GetMapping("/list")
+    public Result getCategories(Category c) {
+        return super.getCategories(c);
     }
 }

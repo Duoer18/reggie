@@ -1,4 +1,4 @@
-package com.duoer.reggie.controller;
+package com.duoer.reggie.controller.impl;
 
 import com.duoer.reggie.common.BaseContext;
 import com.duoer.reggie.common.Result;
@@ -21,7 +21,7 @@ public class ShoppingCartController {
     public Result add(@RequestBody ShoppingCart cart) {
         log.info("add {}", cart);
 
-        cart.setUserId(BaseContext.getEId());
+        cart.setUserId(BaseContext.getUId());
         boolean isSaved = shoppingCartService.addItem(cart);
         if (isSaved) {
             return Result.success("添加购物车成功");
@@ -34,7 +34,7 @@ public class ShoppingCartController {
     public Result sub(@RequestBody ShoppingCart cart) {
         log.info("add {}", cart);
 
-        cart.setUserId(BaseContext.getEId());
+        cart.setUserId(BaseContext.getUId());
         boolean isSaved = shoppingCartService.subtractItem(cart);
         if (isSaved) {
             return Result.success("修改购物车成功");
@@ -47,7 +47,7 @@ public class ShoppingCartController {
     public Result getShoppingCarts() {
         log.info("get all shopping carts");
 
-        List<ShoppingCart> shoppingCarts = shoppingCartService.listCarts(BaseContext.getEId());
+        List<ShoppingCart> shoppingCarts = shoppingCartService.listCarts(BaseContext.getUId());
         return Result.success(shoppingCarts);
     }
 
@@ -55,7 +55,7 @@ public class ShoppingCartController {
     public Result cleanShoppingCarts() {
         log.info("clean shopping carts");
 
-        shoppingCartService.clean(BaseContext.getEId());
+        shoppingCartService.clean(BaseContext.getUId());
         return Result.success("");
     }
 }
