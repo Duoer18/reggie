@@ -1,17 +1,21 @@
 package com.duoer.reggie.controller.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.duoer.reggie.entity.Employee;
 import com.duoer.reggie.common.Result;
 import com.duoer.reggie.service.EmployeeService;
+import com.duoer.reggie.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/employee")
@@ -19,12 +23,14 @@ import javax.servlet.http.HttpSession;
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /**
      * 员工登录接口
      */
     @PostMapping("/login")
-    public Result login(@RequestBody Employee e, HttpSession session) {
+    public Result login(@RequestBody Employee e) {
         // 将密码加密
         String password = e.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
@@ -45,16 +51,21 @@ public class EmployeeController {
 
         // 用户登录成功
         log.info("员工 {} 登录", selectedEm.getUsername());
-        session.setAttribute("employee", selectedEm.getId());
-        return Result.success(selectedEm);
+        String token = JwtUtils.createJWT(String.valueOf(selectedEm.getId()));
+        redisTemplate.opsForValue().set("employee_token_" + token, JSON.toJSONString(selectedEm),
+                60, TimeUnit.MINUTES);
+
+        Result success = Result.success(selectedEm);
+        success.setMsg(token);
+        return success;
     }
 
     /**
      * 员工退出接口
      */
     @PostMapping("/logout")
-    public Result logout(HttpSession session) {
-        session.removeAttribute("employee");
+    public Result logout(@RequestHeader(name = "token", required = false, defaultValue = "") String token) {
+        redisTemplate.delete("employee_token_" + token);
         return Result.success("退出成功");
     }
 

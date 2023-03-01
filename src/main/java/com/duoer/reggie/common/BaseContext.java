@@ -19,4 +19,11 @@ public class BaseContext {
     public static Long getUId() {
         return uidLocal.get();
     }
+
+    public static void removeUid() {
+        uidLocal.remove();
+    }
+    public static void removeEid() {
+        eidLocal.remove();
+    }
 }

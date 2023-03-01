@@ -11,10 +11,6 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
-server:
-  reactive:
-    session:
-      timeout: 60m
 reggie:
   # 文件转储路径
   upload-path: D:/RuijiTakeout/temp/
