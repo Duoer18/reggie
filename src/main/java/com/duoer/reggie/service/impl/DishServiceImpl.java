@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,7 +113,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         // 将菜品缓存
         redisTemplate.opsForValue()
-                .set("dish_category_" + dish.getCategoryId() + "_status_" + dish.getStatus(), dishDtoList);
+                .set("dish_category_" + dish.getCategoryId() + "_status_" + dish.getStatus(),
+                        dishDtoList,
+                        60,
+                        TimeUnit.MINUTES);
         return dishDtoList;
     }
 

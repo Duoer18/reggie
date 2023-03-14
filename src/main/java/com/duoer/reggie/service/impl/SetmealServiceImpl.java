@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,7 +110,9 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         // 将菜品缓存
         redisTemplate.opsForValue()
                 .set("setmeal_category_" + setmeal.getCategoryId() + "_status_" + setmeal.getStatus(),
-                        setmealList);
+                        setmealList,
+                        60,
+                        TimeUnit.MINUTES);
 
         return setmealList;
     }

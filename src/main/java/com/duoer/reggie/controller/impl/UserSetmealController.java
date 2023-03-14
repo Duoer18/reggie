@@ -18,7 +18,7 @@ public class UserSetmealController extends AbstractSetmealController {
     public Result getSetmealList(Setmeal setmeal) {
         log.info("get setmeal categoryId={}", setmeal.getCategoryId());
 
-        List<Setmeal> setmealList = setmealService.listSets(setmeal);
+        List<Setmeal> setmealList = setmealService.listSetMealsWithCache(setmeal);
         return Result.success(setmealList);
     }
 }
