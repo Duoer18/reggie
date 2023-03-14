@@ -8,6 +8,33 @@ spring:
     host: localhost
     port: 6379
     database: 0
+  shardingsphere:
+    datasource:
+      names: master,slave
+      master:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://192.168.86.130:3306/reggie?useServerPrepStmts=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+        username: root
+        password: root
+      slave:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://192.168.86.130:3307/reggie?useServerPrepStmts=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+        username: root
+        password: root
+    masterslave:
+      name: datasource
+      master-data-source-name: master
+      slave-data-source-names: slave
+      load-balance-algorithm-type: round_robin
+    props:
+      sql:
+        show: true
+    enabled: false
+  # 解决sharding的数据源与spring自动装配的数据源的冲突
+  main:
+    allow-bean-definition-overriding: true
 mybatis-plus:
   global-config:
     db-config:
