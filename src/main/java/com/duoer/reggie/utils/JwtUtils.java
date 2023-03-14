@@ -2,6 +2,7 @@ package com.duoer.reggie.utils;
 
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -75,6 +76,10 @@ public class JwtUtils {
      * @return 结果
      */
     public static String parseJWT(String jwt) {
+        if (StringUtils.isEmpty(jwt)) {
+            return null;
+        }
+
         SecretKey secretKey = generalKey();
         try {
             return Jwts.parser()

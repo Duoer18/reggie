@@ -1,21 +1,17 @@
 package com.duoer.reggie.controller.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.duoer.reggie.entity.Employee;
 import com.duoer.reggie.common.Result;
 import com.duoer.reggie.service.EmployeeService;
-import com.duoer.reggie.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/employee")
@@ -23,8 +19,6 @@ import java.util.concurrent.TimeUnit;
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
 
     /**
      * 员工登录接口
@@ -32,32 +26,8 @@ public class EmployeeController {
     @PostMapping("/login")
     public Result login(@RequestBody Employee e) {
         // 将密码加密
-        String password = e.getPassword();
-        password = DigestUtils.md5DigestAsHex(password.getBytes());
-
-        // 验证用户名密码是否正确
-        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Employee::getUsername, e.getUsername())
-                .eq(Employee::getPassword, password);
-        Employee selectedEm = employeeService.getOne(queryWrapper);
-
-        if (selectedEm == null) { // 用户名或密码错误
-            return Result.failed("登录失败");
-        }
-
-        if (selectedEm.getStatus() == 0) { // 账号状态异常
-            return Result.failed("账号已禁用");
-        }
-
-        // 用户登录成功
-        log.info("员工 {} 登录", selectedEm.getUsername());
-        String token = JwtUtils.createJWT(String.valueOf(selectedEm.getId()));
-        redisTemplate.opsForValue().set("employee_token_" + token, JSON.toJSONString(selectedEm),
-                60, TimeUnit.MINUTES);
-
-        Result success = Result.success(selectedEm);
-        success.setMsg(token);
-        return success;
+        e.setPassword(DigestUtils.md5DigestAsHex(e.getPassword().getBytes()));
+        return employeeService.login(e);
     }
 
     /**
@@ -65,8 +35,7 @@ public class EmployeeController {
      */
     @PostMapping("/logout")
     public Result logout(@RequestHeader(name = "token", required = false, defaultValue = "") String token) {
-        redisTemplate.delete("employee_token_" + token);
-        return Result.success("退出成功");
+        return employeeService.logout(token);
     }
 
     /**
