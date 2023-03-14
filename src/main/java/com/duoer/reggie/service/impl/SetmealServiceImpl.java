@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -150,7 +151,14 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
                 .collect(Collectors.toList());
         boolean isUpdated = updateBatchById(setmealList);
 
-        System.out.println(setmealList.get(0));
+        if (isUpdated) {
+            Set<Long> categories = listByIds(ids).stream()
+                    .map(Setmeal::getCategoryId)
+                    .collect(Collectors.toSet());
+            for (Long categoryId : categories) {
+                redisTemplate.delete("setmeal_category_" + categoryId + "_status_1");
+            }
+        }
 
         return isUpdated;
     }

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -155,7 +156,15 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                 .collect(Collectors.toList());
         boolean isUpdated = updateBatchById(dishes);
 
-        System.out.println(dishes.get(0));
+        if (isUpdated) {
+            // 清缓存
+            Set<Long> categories = listByIds(ids).stream()
+                    .map(Dish::getCategoryId)
+                    .collect(Collectors.toSet());
+            for (Long categoryId : categories) {
+                redisTemplate.delete("dish_category_" + categoryId + "_status_1");
+            }
+        }
 
         return isUpdated;
     }
