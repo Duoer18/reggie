@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/setmeal")
@@ -88,15 +87,7 @@ public class SetmealController {
 
     @PostMapping("/status/{status}")
     public Result changeSetmealStatus(@PathVariable int status, @RequestParam List<Long> ids) {
-        List<Setmeal> setmealList = ids.stream()
-                .map(id -> {
-                    Setmeal setmeal = new Setmeal();
-                    setmeal.setId(id);
-                    setmeal.setStatus(status);
-                    return setmeal;
-                })
-                .collect(Collectors.toList());
-        boolean isUpdated = setmealService.updateBatchById(setmealList);
+        boolean isUpdated = setmealService.changeSetMealStatus(status, ids);
         if (isUpdated) {
             return Result.success("套餐状态修改成功");
         } else {

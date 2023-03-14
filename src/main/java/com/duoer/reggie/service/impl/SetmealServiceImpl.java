@@ -138,6 +138,23 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         return isUpdated;
     }
 
+    @Override
+    public boolean changeSetMealStatus(int status, List<Long> ids) {
+        List<Setmeal> setmealList = ids.stream()
+                .map(id -> {
+                    Setmeal setmeal = new Setmeal();
+                    setmeal.setId(id);
+                    setmeal.setStatus(status);
+                    return setmeal;
+                })
+                .collect(Collectors.toList());
+        boolean isUpdated = updateBatchById(setmealList);
+
+        System.out.println(setmealList.get(0));
+
+        return isUpdated;
+    }
+
     @Transactional
     @Override
     public boolean deleteSetmeal(List<Long> ids) {

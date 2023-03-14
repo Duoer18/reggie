@@ -13,6 +13,9 @@ public interface SetmealService extends IService<Setmeal> {
     List<Setmeal> listSetMealsWithCache(Setmeal setmeal);
 
     boolean updateSetmeal(SetmealDto setmealDto);
+
+    boolean changeSetMealStatus(int status, List<Long> ids);
+
     boolean deleteSetmeal(List<Long> ids);
     SetmealDto getDto(Setmeal setmeal, boolean setDishes);
     List<SetmealDto> getDtoList(List<Setmeal> setmealList, boolean setDishes);

@@ -143,6 +143,23 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         return isUpdated;
     }
 
+    @Override
+    public boolean changeDishStatus(int status, List<Long> ids) {
+        List<Dish> dishes = ids.stream()
+                .map(id -> {
+                    Dish dish = new Dish();
+                    dish.setId(id);
+                    dish.setStatus(status);
+                    return dish;
+                })
+                .collect(Collectors.toList());
+        boolean isUpdated = updateBatchById(dishes);
+
+        System.out.println(dishes.get(0));
+
+        return isUpdated;
+    }
+
     @Transactional
     @Override
     public boolean deleteDishes(List<Long> ids) {
