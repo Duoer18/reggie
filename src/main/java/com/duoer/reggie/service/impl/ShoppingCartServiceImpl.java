@@ -51,24 +51,51 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Transactional
     @Override
     public boolean addItem(ShoppingCart cart) {
-        ShoppingCart existOne = getExist(cart);
-        if (existOne == null) {
+//        ShoppingCart existOne = getExist(cart);
+//        if (existOne == null) {
+//            cart.setNumber(1);
+//            cart.setCreateTime(LocalDateTime.now());
+//            return save(cart);
+//        } else {
+//            return shoppingCartMapper.increaseNumber(existOne);
+//        }
+
+        boolean updated;
+        // 直接更新数据库中购物车项的数量
+        if (cart.getDishId() != null) {
+            updated = shoppingCartMapper.increaseNumberByUserIdAndDishId(cart);
+        } else if (cart.getSetmealId() != null) {
+            updated = shoppingCartMapper.increaseNumberByUserIdAndSetMealId(cart);
+        } else {
+            throw new ServiceException("未选择菜品或套餐");
+        }
+
+        // 若更新失败，说明未存在该项目，则新建
+        if (!updated) {
             cart.setNumber(1);
             cart.setCreateTime(LocalDateTime.now());
             return save(cart);
-        } else {
-            return shoppingCartMapper.increaseNumber(existOne);
         }
+
+        return true;
     }
 
     @Transactional
     @Override
     public boolean subtractItem(ShoppingCart cart) {
-        ShoppingCart existOne = getExist(cart);
-        if (existOne != null && existOne.getNumber() > 0) {
-            return shoppingCartMapper.decreaseNumber(existOne.getId());
+//        ShoppingCart existOne = getExist(cart);
+//        if (existOne != null && existOne.getNumber() > 0) {
+//            return shoppingCartMapper.decreaseNumber(existOne.getId());
+//        }
+//        return false;
+
+        if (cart.getDishId() != null) {
+            return shoppingCartMapper.decreaseNumberByUserIdAndDishId(cart);
+        } else if (cart.getSetmealId() != null) {
+            return shoppingCartMapper.decreaseNumberByUserIdAndSetMealId(cart);
+        } else {
+            throw new ServiceException("未选择菜品或套餐");
         }
-        return false;
     }
 
     @Override
