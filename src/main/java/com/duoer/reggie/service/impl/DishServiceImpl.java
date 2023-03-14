@@ -14,6 +14,7 @@ import com.duoer.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,15 +28,23 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     private DishFlavorService dishFlavorService;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     @Transactional
     @Override
     public boolean saveWithFlavor(DishDto dishDto) {
         boolean isSaved = save(dishDto);
 
-        // 添加所有口味
-        dishDto.getFlavors().forEach((dishFlavor -> dishFlavor.setDishId(dishDto.getId())));
-        dishFlavorService.saveBatch(dishDto.getFlavors());
+        if (isSaved) {
+            // 添加所有口味
+            dishDto.getFlavors().forEach((dishFlavor -> dishFlavor.setDishId(dishDto.getId())));
+            dishFlavorService.saveBatch(dishDto.getFlavors());
+
+            // 清除菜品缓存
+            redisTemplate.delete("dish_category_" + dishDto.getCategoryId()
+                    + "_status_" + dishDto.getStatus());
+        }
 
         return isSaved;
     }
@@ -88,9 +97,31 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         return getDtoList(dishes, true);
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<DishDto> listDishesWithCache(Dish dish) {
+        // 查缓存
+        List<DishDto> dishDtoList = (List<DishDto>) redisTemplate.opsForValue()
+                .get("dish_category_" + dish.getCategoryId() + "_status_" + dish.getStatus());
+        if (dishDtoList != null && dishDtoList.size() > 0) {
+            return dishDtoList;
+        }
+
+        // 未命中
+        dishDtoList = listDishes(dish);
+
+        // 将菜品缓存
+        redisTemplate.opsForValue()
+                .set("dish_category_" + dish.getCategoryId() + "_status_" + dish.getStatus(), dishDtoList);
+        return dishDtoList;
+    }
+
     @Transactional
     @Override
     public boolean updateDish(DishDto dishDto) {
+        Long categoryId = dishDto.getCategoryId();
+        Integer status = dishDto.getStatus();
+
         boolean isUpdated = updateById(dishDto);
 
         // 删除原口味
@@ -101,6 +132,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         // 添加新口味
         dishDto.getFlavors().forEach((dishFlavor -> dishFlavor.setDishId(dishDto.getId())));
         dishFlavorService.saveBatch(dishDto.getFlavors());
+
+        // 清除菜品缓存
+        redisTemplate.delete("dish_category_" + categoryId + "_status_" + status);
+
         return isUpdated;
     }
 

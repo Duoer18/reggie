@@ -9,6 +9,9 @@ import java.util.List;
 public interface DishService extends IService<Dish> {
     boolean saveWithFlavor(DishDto dishDto);
     DishDto getDishById(long id);
+
+    List<DishDto> listDishesWithCache(Dish dish);
+
     boolean updateDish(DishDto dishDto);
     boolean deleteDishes(List<Long> ids);
     DishDto getDto(Dish dish, boolean setFlavors);

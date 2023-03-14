@@ -13,6 +13,7 @@ import com.duoer.reggie.service.SetmealDishService;
 import com.duoer.reggie.service.SetmealService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,8 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     private SetmealDishService setmealDishService;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     @Transactional
     @Override
@@ -32,9 +35,15 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         // 添加套餐到套餐表
         boolean isSaved = save(setmealDto);
 
-        // 添加套餐菜品
-        setmealDto.getSetmealDishes().forEach(dish -> dish.setSetmealId(setmealDto.getId()));
-        setmealDishService.saveBatch(setmealDto.getSetmealDishes());
+        if (isSaved) {
+            // 添加套餐菜品
+            setmealDto.getSetmealDishes().forEach(dish -> dish.setSetmealId(setmealDto.getId()));
+            setmealDishService.saveBatch(setmealDto.getSetmealDishes());
+
+            // 清缓存
+            redisTemplate.delete("setmeal_category_" + setmealDto.getCategoryId()
+                    + "_status_" + setmealDto.getStatus());
+        }
 
         return isSaved;
     }
@@ -74,6 +83,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         return getDto(setmeal, true);
     }
 
+    @Override
     public List<Setmeal> listSets(Setmeal setmeal) {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId())
@@ -83,9 +93,33 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         return list(queryWrapper);
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Setmeal> listSetMealsWithCache(Setmeal setmeal) {
+        // 查缓存
+        List<Setmeal> setmealList = (List<Setmeal>) redisTemplate.opsForValue()
+                .get("setmeal_category_" + setmeal.getCategoryId() + "_status_" + setmeal.getStatus());
+        if (setmealList != null && setmealList.size() > 0) {
+            return setmealList;
+        }
+
+        // 未命中
+        setmealList = listSets(setmeal);
+
+        // 将菜品缓存
+        redisTemplate.opsForValue()
+                .set("setmeal_category_" + setmeal.getCategoryId() + "_status_" + setmeal.getStatus(),
+                        setmealList);
+
+        return setmealList;
+    }
+
     @Transactional
     @Override
     public boolean updateSetmeal(SetmealDto setmealDto) {
+        Long categoryId = setmealDto.getCategoryId();
+        Integer status = setmealDto.getStatus();
+
         boolean isUpdated = updateById(setmealDto);
 
         LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
@@ -94,6 +128,9 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
         setmealDto.getSetmealDishes().forEach(dish -> dish.setSetmealId(setmealDto.getId()));
         setmealDishService.saveBatch(setmealDto.getSetmealDishes());
+
+        // 清缓存
+        redisTemplate.delete("setmeal_category_" + categoryId + "_status_" + status);
 
         return isUpdated;
     }

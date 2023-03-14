@@ -109,6 +109,9 @@ public class DishController extends AbstractDishController {
 
     @GetMapping("/list")
     public Result getDishes(Dish dish) {
-        return super.getDishes(dish);
+        log.info("get dishes in categoryId={} and status={}", dish.getCategoryId(), dish.getStatus());
+
+        List<DishDto> dishDtoList = dishService.listDishes(dish);
+        return Result.success(dishDtoList);
     }
 }

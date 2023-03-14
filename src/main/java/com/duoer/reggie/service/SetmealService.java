@@ -9,6 +9,9 @@ import java.util.List;
 public interface SetmealService extends IService<Setmeal> {
     boolean addSetmeal(SetmealDto setmealDto);
     SetmealDto getSetById(long id);
+
+    List<Setmeal> listSetMealsWithCache(Setmeal setmeal);
+
     boolean updateSetmeal(SetmealDto setmealDto);
     boolean deleteSetmeal(List<Long> ids);
     SetmealDto getDto(Setmeal setmeal, boolean setDishes);

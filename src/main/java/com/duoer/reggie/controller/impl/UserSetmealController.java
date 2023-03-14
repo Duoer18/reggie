@@ -8,12 +8,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/u-setmeal")
 @Slf4j
 public class UserSetmealController extends AbstractSetmealController {
     @GetMapping("/list")
     public Result getSetmealList(Setmeal setmeal) {
-        return super.getSetmealList(setmeal);
+        log.info("get setmeal categoryId={}", setmeal.getCategoryId());
+
+        List<Setmeal> setmealList = setmealService.listSets(setmeal);
+        return Result.success(setmealList);
     }
 }
