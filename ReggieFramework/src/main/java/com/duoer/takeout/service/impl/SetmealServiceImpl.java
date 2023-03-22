@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -120,7 +121,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         // 查缓存
         List<Setmeal> setmealList = (List<Setmeal>) redisTemplate.opsForValue()
                 .get("setmeal_category_" + setmeal.getCategoryId() + "_status_" + setmeal.getStatus());
-        if (setmealList != null && setmealList.size() > 0) {
+        if (!CollectionUtils.isEmpty(setmealList)) {
             return setmealList;
         }
 

@@ -110,9 +110,9 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    public Page<? extends Orders> getAllOrdersByPage(int page, int pageSize, String number,
-                                                     String beginTime, String endTime,
-                                                     boolean withDetails) {
+    public Page<? extends Orders> getOrdersByPage(int page, int pageSize, String number,
+                                                  String beginTime, String endTime,
+                                                  boolean withDetails) {
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(number != null, Orders::getNumber, number)
                 .ge(beginTime != null, Orders::getOrderTime, beginTime)

@@ -21,7 +21,7 @@ public class OrdersController {
         log.info("get order page={}, size={}, number={}, begin time={}, end time={}",
                 page, pageSize, number, beginTime, endTime);
 
-        Page<? extends Orders> ordersPage = ordersService.getAllOrdersByPage(page, pageSize, number,
+        Page<? extends Orders> ordersPage = ordersService.getOrdersByPage(page, pageSize, number,
                 beginTime, endTime, true);
         return Result.success(ordersPage);
     }

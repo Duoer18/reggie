@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -125,7 +126,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         // 查缓存
         List<DishDto> dishDtoList = (List<DishDto>) redisTemplate.opsForValue()
                 .get("dish_category_" + dish.getCategoryId() + "_status_" + dish.getStatus());
-        if (dishDtoList != null && dishDtoList.size() > 0) {
+        if (!CollectionUtils.isEmpty(dishDtoList)) {
             return dishDtoList;
         }
 
