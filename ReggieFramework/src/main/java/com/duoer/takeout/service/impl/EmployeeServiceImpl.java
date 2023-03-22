@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.duoer.takeout.common.Result;
 import com.duoer.takeout.dao.EmployeeMapper;
+import com.duoer.takeout.dto.EmployeeDto;
 import com.duoer.takeout.entity.Employee;
 import com.duoer.takeout.service.EmployeeService;
+import com.duoer.takeout.utils.BeanCopyUtils;
 import com.duoer.takeout.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -43,8 +45,13 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         // 用户登录成功
         log.info("员工 {} 登录", selectedEm.getUsername());
         String token = JwtUtils.createJWT(String.valueOf(selectedEm.getId()));
-        redisTemplate.opsForValue().set("employee_token_" + token, com.alibaba.fastjson.JSON.toJSONString(selectedEm),
-                60, TimeUnit.MINUTES);
+        EmployeeDto employeeDto = BeanCopyUtils.convertBean(selectedEm, EmployeeDto.class);
+        employeeDto.setToken(token);
+        redisTemplate.opsForValue()
+                .set("employee_id_" + selectedEm.getId(),
+                        JSON.toJSONString(employeeDto),
+                60,
+                        TimeUnit.MINUTES);
 
         Result success = Result.success(selectedEm);
         success.setMsg(token);
@@ -58,12 +65,16 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
             return null;
         }
 
-        String employeeJSON = redisTemplate.opsForValue().get("employee_token_" + token);
+        String employeeJSON = redisTemplate.opsForValue().get("employee_id_" + idStr);
         if (StringUtils.isEmpty(employeeJSON)) {
             return null;
         }
 
-        Employee e = JSON.parseObject(employeeJSON, Employee.class);
+        EmployeeDto e = JSON.parseObject(employeeJSON, EmployeeDto.class);
+        if (!token.equals(e.getToken())) {
+            return null;
+        }
+
         if (e.getId() == null) {
             e.setId(Long.parseLong(idStr));
         }
