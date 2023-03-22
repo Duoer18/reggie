@@ -1,10 +1,10 @@
 package com.duoer.takeout.interceptor;
 
-import com.alibaba.fastjson.JSON;
 import com.duoer.takeout.common.BaseContext;
 import com.duoer.takeout.common.Result;
 import com.duoer.takeout.entity.User;
 import com.duoer.takeout.service.UserService;
+import com.duoer.takeout.utils.WebUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ public class UserLoginInterceptor implements HandlerInterceptor {
         User user = userService.checkToken(token);
         if (user == null) {
             log.info("Accessing {} intercepted", request.getRequestURI());
-            response.getWriter().write(JSON.toJSONString(Result.failed("NOTLOGIN")));
+            WebUtils.responseJson(response, Result.failed("NOTLOGIN"));
             return false;
         }
 
