@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.duoer.takeout.common.BaseContext;
 import com.duoer.takeout.common.Result;
 import com.duoer.takeout.dao.EmployeeMapper;
 import com.duoer.takeout.dto.EmployeeDto;
@@ -83,7 +84,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     @Override
     public Result logout(String token) {
-        redisTemplate.delete("employee_token_" + token);
+        redisTemplate.delete("employee_id_" + BaseContext.getEId());
         return Result.success("退出成功");
     }
 
